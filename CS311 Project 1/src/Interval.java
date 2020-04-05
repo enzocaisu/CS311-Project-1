@@ -11,4 +11,5 @@ public class Interval {
 	public int getLow() {return low;}
 	public int getHigh() {return high;}
 	public int getReallyHigh() {return 420;}
+	public boolean overlaps(Interval interval) {return low <= interval.high && interval.low <= high;}
 }

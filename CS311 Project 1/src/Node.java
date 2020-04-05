@@ -20,5 +20,9 @@ public class Node {
 	Node getRight() {return right;}
 	Interval getInterv() {return i;}
 	int getIMax() {return imax;}
-	int getPriority() {return priority;}		
+	int getPriority() {return priority;}
+	public int key() {return i.low;}
+	public void setLeft(Node n2) {left = n2;}
+	public void setParent(Node n1) {parent = n1;}
+	public void setRight(Node n3) {right = n3;}
 }
