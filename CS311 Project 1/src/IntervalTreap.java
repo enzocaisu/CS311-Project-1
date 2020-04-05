@@ -7,56 +7,68 @@ public class IntervalTreap {
 	public IntervalTreap() {};
 	Node root = null;
 	int size = 0;
-	int height = 0;
+	int height = -1;
 	Node getRoot() {return root;}
 	int getSize() {return size;}
 	int getHeight() {return height;}
-	
+	//-------------------------------------------------------------------------------------------------
 	void intervalInsert(Node z) {
+		int h = 0;//this is approximately correct for keeping track of height.
 		if(root == null) {
 			root = z;
-			z.parent = z;
+			z.parent = null;
 			size = 1;
-			height = 1;
+			height = 0;
+			System.out.println("Inserted root "+z+".");
 			return;
 		}
 		Node x = root;
 		z.imax = z.i.high;
+		String chiral = null;
 		while(x != null) {
 			updateImax(x);
 			if(z.i.low <= x.i.low) {
 				if(x.left != null) {
 					x = x.left;
+					h++;
 					continue;
 				} else {
 					x.left = z;
 					z.parent = x;
+					chiral = "left";
 					break;
 				}
 			} else {
 				if(x.right != null) {
 					x = x.right;
+					h++;
 					continue;
 				} else {
 					x.right = z;
 					z.parent = x;
+					chiral = "right";
 					break;
 				}
 			}
 		}
+		if(h > height) height = h;
+		System.out.println("Inserted node "+z+" as "+chiral+" child of "+z.parent+".");
 		//End of Phase 1, begin Rotation Up
 		rotateUp(z);
+		System.out.println();
 	}
-	
+	//-------------------------------------------------------------------------------------------------
 	void rotateUp(Node z) {
 		Node g, p = null;
-		while(z.priority < z.parent.priority) {
+		while(z.parent != null && z.priority < z.parent.priority) {
 			g = z.parent.parent;
 			p = z.parent;
-			if(g.right == p) g.right = z;
-			if(g.left == p) g.left = z;
+			
+			if(g != null && g.right == p) g.right = z;
+			if(g != null && g.left == p) g.left = z;
 			z.parent = g;
-			if(z == z.parent.left) {
+			
+			if(z == p.left) {
 				p.left = z.right;
 				if(p.left != null) p.left.parent = p;
 				z.right = p;
@@ -67,6 +79,7 @@ public class IntervalTreap {
 			}
 			p.parent = z;
 			updateImax(p);
+			System.out.println("Rotated node " + z + " to "+ p +".");
 		}
 	}
 	
@@ -81,20 +94,27 @@ public class IntervalTreap {
 			p.imax = Math.max(p.i.high, Math.max(p.left.imax, p.right.imax));
 		}
 	}
-	
+	//------------------------------------------------------------------------------------------------
 	void intervalDelete(Node z) {
-		Node y = null;
+		Node y = z.parent;
 		if(z.left == null) {
-			replace(z, z.right);
+			Node n = z.right;
+			replace(z, n);
+			System.out.println("Deleted node "+z);
+			z = n;
+			return;
 		} else if (z.right == null) {
-			replace(z, z.left);
+			Node n = z.left;
+			replace(z, n);
+			System.out.println("Deleted node "+z);
+			z = n;
+			return;
 		} else {
 			Node s = findSuccessor(z);
 			y = s.parent;
 			replace(z, s);
-		}
-		if(z == null) {
-			y = z.parent;
+			intervalDelete(z);
+			z = s;
 		}
 		while(y != null) {
 			updateImax(y);
@@ -102,7 +122,7 @@ public class IntervalTreap {
 		}
 		//Phase 1 done, rotate
 		int p = Math.min(z.left.priority,  z.right.priority);
-		while(z.priority >= p) {
+		while(z.priority > p) {
 			if(z.left.priority == p) {
 				rotateUp(z.left);
 			} else {
@@ -112,26 +132,27 @@ public class IntervalTreap {
 		}
 	}
 	
-	/**
-	 * Replaces node a with node b in the treap. Maintains b's children, does not maintain a's children.
-	 * @param a
-	 * @param b
-	 */
 	void replace(Node a, Node b) {
 		Node p = a.parent;
-		if(a == p.left) {
+		if(p == null) {
+		} else if(a == p.left) {
 			p.left = b;
 		} else {
 			p.right = b;
 		}
 		b.parent = p;
+		p = a.left;
+		a.left = b.left;
+		b.left = p;
+		if(p != null) p.parent = b;
+		
+		p = a.right;
+		a.right = b.right;
+		b.right = p;
+		if(p != null) p.parent = b;
+		System.out.println("Replaced "+a+" and "+b);
 	}
 	
-	/**
-	 * Finds the successor of a node in the treap. Should allow inorder traversal.
-	 * @param z
-	 * @return
-	 */
 	Node findSuccessor(Node z) {
 		if(z.right != null) {
 			Node r = z.right;
@@ -192,11 +213,6 @@ public class IntervalTreap {
 			}
 		}
 		return x;
-	}
-	
-	public List<Node> inOrder() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 	public Node minimum() {

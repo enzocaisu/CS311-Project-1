@@ -36,5 +36,11 @@ public class Tests {
 		itreap.intervalInsert(i);
 		itreap.intervalInsert(j);
 		itreap.intervalInsert(k);
+	
+		System.out.println("Searched for 27, found "+ itreap.intervalSearch(new Interval(27, 27)));
+		System.out.println("Searched for 33, found "+ itreap.intervalSearch(new Interval(33, 33)));
+		
+		itreap.intervalDelete(itreap.root);
+		return;
 	}
 }

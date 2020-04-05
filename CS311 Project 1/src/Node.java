@@ -25,4 +25,10 @@ public class Node {
 	public void setLeft(Node n2) {left = n2;}
 	public void setParent(Node n1) {parent = n1;}
 	public void setRight(Node n3) {right = n3;}
+	
+	@Override
+	public String toString() {
+		String s = ("[" + i.low + ", " + i.high + "]:" + priority);
+		return s;
+	}
 }
