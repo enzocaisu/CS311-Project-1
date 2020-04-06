@@ -1,3 +1,5 @@
+import java.util.List;
+
 import org.junit.Test;
 
 public class Tests {
@@ -40,6 +42,14 @@ public class Tests {
 		System.out.println("Searched for 27, found "+ itreap.intervalSearch(new Interval(27, 27)));
 		System.out.println("Searched for 33, found "+ itreap.intervalSearch(new Interval(33, 33)));
 		
+		System.out.println(itreap.getHeight());
+		
+		System.out.println(itreap.intervalSearchExactly(new Interval(27, 27)));
+		System.out.println(itreap.intervalSearchExactly(new Interval(25, 30)));
+		List<Interval> ilist = itreap.overlappingIntervals(new Interval(19, 20));
+		for(Interval in : ilist) {
+			System.out.println("["+in.low+", "+in.high+"]");
+		}
 		itreap.intervalDelete(itreap.root);
 		return;
 	}

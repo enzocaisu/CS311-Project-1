@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,6 +53,7 @@ public class IntervalTreap {
 			}
 		}
 		if(h > height) height = h;
+		size++;
 		System.out.println("Inserted node "+z+" as "+chiral+" child of "+z.parent+".");
 		//End of Phase 1, begin Rotation Up
 		rotateUp(z);
@@ -67,15 +69,20 @@ public class IntervalTreap {
 			if(g != null && g.right == p) g.right = z;
 			if(g != null && g.left == p) g.left = z;
 			z.parent = g;
+			if(g == null) root = z;
 			
 			if(z == p.left) {
 				p.left = z.right;
 				if(p.left != null) p.left.parent = p;
 				z.right = p;
+				if(z.left != null) height--;
+				if(p.right != null) height++;
 			} else {
 				p.right = z.left;
 				if(p.right != null) p.right.parent = p;
 				z.left = p;
+				if(z.right != null) height--;
+				if(p.left != null) height++;
 			}
 			p.parent = z;
 			updateImax(p);
@@ -128,28 +135,32 @@ public class IntervalTreap {
 			} else {
 				rotateUp(z.right);
 			}
-			p = Math.min(z.left.priority,  z.right.priority);
+			if(z.left != null && z.right != null) p = Math.min(z.left.priority,  z.right.priority);
+			if(z.left == null) p = z.right.priority;
+			if(z.right == null) p = z.left.priority;
 		}
 	}
 	
 	void replace(Node a, Node b) {
-		Node p = a.parent;
-		if(p == null) {
-		} else if(a == p.left) {
-			p.left = b;
+		Node n = a.parent;
+		if(n == null) {
+		} else if(a == n.left) {
+			n.left = b;
 		} else {
-			p.right = b;
+			n.right = b;
 		}
-		b.parent = p;
-		p = a.left;
-		a.left = b.left;
-		b.left = p;
-		if(p != null) p.parent = b;
+		a.parent = b.parent;
+		b.parent = n;
 		
-		p = a.right;
+		n = a.left;
+		a.left = b.left;
+		b.left = n;
+		if(n != null) n.parent = b;
+		
+		n = a.right;
 		a.right = b.right;
-		b.right = p;
-		if(p != null) p.parent = b;
+		b.right = n;
+		if(n != null) n.parent = b;
 		System.out.println("Replaced "+a+" and "+b);
 	}
 	
@@ -188,24 +199,27 @@ public class IntervalTreap {
 	}
 	
 	List<Interval> overlappingIntervals(Interval i){
-		List<Interval> ilist = null;
-		Node temp = root;
-		Node n = root;
-		while(n != null) {
-			n = intervalSearch(n, i);
-			ilist.add(n.i);
-			root = n.left;
-			ilist.addAll(overlappingIntervals(i));
-			root = n.right;
+		List<Interval> ilist = new ArrayList<Interval>();
+		if(root == null) return ilist;
+		System.out.println("root "+root);
+		Node t = root;
+		if(t.i.overlaps(i)) ilist.add(t.i);
+		if(t.left != null) {
+			root = intervalSearch(t.left, i);
 			ilist.addAll(overlappingIntervals(i));
 		}
-		root = temp;
+		if(t.right != null) {
+			root = intervalSearch(t.right, i);
+			ilist.addAll(overlappingIntervals(i));
+		}
+		root = t;
 		return ilist;
 	}
 	
-	Node intervalSearchExactly(Interval i) {
+	public Node intervalSearchExactly(Interval i) {
 		Node x = root;
-		while(x != null && !(i.low == x.i.low && x.i.high == i.high)) {
+		while(x != null && !(x.i.low == i.low && x.i.high == i.high)) {
+			//System.out.println("Exactly checking "+x);
 			if(x.left != null && x.left.imax >= i.low) {
 				x = x.left;
 			} else {
